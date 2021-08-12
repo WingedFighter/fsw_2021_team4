@@ -38,6 +38,17 @@
 */
 #define T4_NOOP_CC                 0
 #define T4_RESET_CC                1
+#define T4_SET_CAP_STATE_CC        2
+#define T4_SET_HEALTH_CC           3
+#define T4_SET_OBS_TLD_CC          4
+#define T4_GET_OBS_VALUE_CC        5
+#define T4_SET_LVR_TLD_CC          6
+#define T4_SET_CRT_TLD_CC          7
+#define T4_SET_HEAT_TLD_CC         8
+#define T4_SET_ACTIVE_CAP_CC       9
+#define T4_SET_VERBOSITY_CC        10
+#define T4_GET_CAP_CHARGE_CC       11
+#define T4_GET_LVR_VALUE_CC        12
 
 /*
 ** Local Structure Declarations
@@ -49,9 +60,75 @@ typedef struct
     uint8              usCmdErrCnt;
 
     /* TODO:  Add declarations for additional housekeeping data here */
+    uint8              cap_charge;
+    uint8              cap_state;
+    uint8              health;
+    uint8              louver;
+    uint8              obs;
+    uint8              active_cap;
+    uint8              heat_threshold;
+    uint8              critical_threshold;
+    uint8              obs_threshold;
+    uint8              louver_threshold;
+    uint8              health_threshold;
 
 } T4_HkTlm_t;
 
+typedef struct
+{
+    uint8              CmdHeader[CFE_SB_CMD_HDR_SIZE];
+
+    uint8              cap_state;
+} T4_CapState_t;
+
+typedef struct
+{
+    uint8              CmdHeader[CFE_SB_CMD_HDR_SIZE];
+
+    uint8              health;
+} T4_Health_t;
+
+typedef struct
+{
+    uint8              CmdHeader[CFE_SB_CMD_HDR_SIZE];
+
+    uint8              heat_threshold;
+} T4_HeatThreshold_t;
+
+typedef struct
+{
+    uint8              CmdHeader[CFE_SB_CMD_HDR_SIZE];
+
+    uint8              critical_threshold;
+} T4_CriticalThreshold_t;
+
+typedef struct
+{
+    uint8              CmdHeader[CFE_SB_CMD_HDR_SIZE];
+
+    uint8              active_cap;
+} T4_ActiveCap_t;
+
+typedef struct
+{
+    uint8              CmdHeader[CFE_SB_CMD_HDR_SIZE];
+
+    uint8              obs_threshold;
+} T4_ObsThreshold_t;
+
+typedef struct
+{
+    uint8              CmdHeader[CFE_SB_CMD_HDR_SIZE];
+
+    uint8              louver_threshold;
+} T4_LouverThreshold_t;
+
+typedef struct
+{
+    uint8              CmdHeader[CFE_SB_CMD_HDR_SIZE];
+
+    uint8              health_threshold;
+} T4_HealthThreshold_t;
 
 #endif /* _T4_MSG_H_ */
 

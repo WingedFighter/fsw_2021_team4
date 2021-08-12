@@ -44,6 +44,7 @@
 #include "t4_platform_cfg.h"
 #include "t4_mission_cfg.h"
 #include "t4_app.h"
+#include "t4_msg.h"
 
 /*
 ** Local Defines
@@ -806,6 +807,39 @@ void T4_ProcessNewAppCmds(CFE_SB_Msg_t* MsgPtr)
 
             /* TODO:  Add code to process the rest of the T4 commands here */
 
+            case T4_SET_CAP_STATE_CC:;
+                T4_CapState_t *CmdPtr = (T4_CapState_t *) MsgPtr;
+                g_T4_AppData.HkTlm.cap_state = CmdPtr->cap_state;
+                break;
+            case T4_SET_HEALTH_CC:;
+                T4_Health_t *CmdPtr1 = (T4_Health_t *) MsgPtr;
+                g_T4_AppData.HkTlm.health = CmdPtr1->health;
+                break;
+            case T4_SET_OBS_TLD_CC:;
+                T4_ObsThreshold_t *CmdPtr2 = (T4_ObsThreshold_t *) MsgPtr;
+                g_T4_AppData.HkTlm.obs_threshold = CmdPtr2->obs_threshold;
+                break;
+            case T4_SET_LVR_TLD_CC:;
+                T4_LouverThreshold_t *CmdPtr3 = (T4_LouverThreshold_t *) MsgPtr;
+                g_T4_AppData.HkTlm.louver_threshold = CmdPtr3->louver_threshold;
+                break;
+            case T4_SET_CRT_TLD_CC:;
+                T4_CriticalThreshold_t *CmdPtr4 = (T4_CriticalThreshold_t *) MsgPtr;
+                g_T4_AppData.HkTlm.critical_threshold = CmdPtr4->critical_threshold;
+                break;
+            case T4_SET_HEAT_TLD_CC:;
+                T4_HeatThreshold_t *CmdPtr5 = (T4_HeatThreshold_t *) MsgPtr;
+                g_T4_AppData.HkTlm.heat_threshold = CmdPtr5->heat_threshold;
+                break;
+            case T4_SET_ACTIVE_CAP_CC:;
+                T4_ActiveCap_t *CmdPtr6 = (T4_ActiveCap_t *) MsgPtr;
+                g_T4_AppData.HkTlm.active_cap = CmdPtr6->active_cap;
+                break;
+            case T4_SET_VERBOSITY_CC:
+            case T4_GET_OBS_VALUE_CC:
+            case T4_GET_CAP_CHARGE_CC:
+            case T4_GET_LVR_VALUE_CC:
+
             default:
                 g_T4_AppData.HkTlm.usCmdErrCnt++;
                 CFE_EVS_SendEvent(T4_MSGID_ERR_EID, CFE_EVS_ERROR,
@@ -903,8 +937,10 @@ void T4_SendOutData()
 {
     /* TODO:  Add code to update output data, if needed, here.  */
 
-    CFE_SB_TimeStampMsg((CFE_SB_Msg_t*)&g_T4_AppData.OutData);
-    CFE_SB_SendMsg((CFE_SB_Msg_t*)&g_T4_AppData.OutData);
+    T4_ReportHousekeeping();
+
+    //CFE_SB_TimeStampMsg((CFE_SB_Msg_t*)&g_T4_AppData.OutData);
+    //CFE_SB_SendMsg((CFE_SB_Msg_t*)&g_T4_AppData.OutData);
 }
     
 /*=====================================================================================
