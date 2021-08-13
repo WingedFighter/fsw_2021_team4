@@ -807,38 +807,49 @@ void T4_ProcessNewAppCmds(CFE_SB_Msg_t* MsgPtr)
 
             /* TODO:  Add code to process the rest of the T4 commands here */
 
-            case T4_SET_CAP_STATE_CC:;
+            case T4_SET_CAP_STATE_CC:; //Set Cap State to specific value
                 T4_CapState_t *CmdPtr = (T4_CapState_t *) MsgPtr;
                 g_T4_AppData.HkTlm.cap_state = CmdPtr->cap_state;
                 break;
-            case T4_SET_HEALTH_CC:;
-                T4_Health_t *CmdPtr1 = (T4_Health_t *) MsgPtr;
-                g_T4_AppData.HkTlm.health = CmdPtr1->health;
+            case T4_SET_ACTIVE_CAP_CC:; //Set Active Cap to specific value
+                T4_ActiveCap_t *CmdPtr1 = (T4_ActiveCap_t *) MsgPtr;
+                g_T4_AppData.HkTlm.active_cap = CmdPtr1->active_cap;
                 break;
-            case T4_SET_OBS_TLD_CC:;
-                T4_ObsThreshold_t *CmdPtr2 = (T4_ObsThreshold_t *) MsgPtr;
-                g_T4_AppData.HkTlm.obs_threshold = CmdPtr2->obs_threshold;
+            case T4_SET_HEALTH_CC:; //Set Health state to specific value
+                T4_Health_t *CmdPtr2 = (T4_Health_t *) MsgPtr;
+                g_T4_AppData.HkTlm.health = CmdPtr2->health;
                 break;
-            case T4_SET_LVR_TLD_CC:;
-                T4_LouverThreshold_t *CmdPtr3 = (T4_LouverThreshold_t *) MsgPtr;
-                g_T4_AppData.HkTlm.louver_threshold = CmdPtr3->louver_threshold;
+            case T4_SET_OBS_TLD_CC:; //Set Obs threshold to specific value
+                T4_ObsThreshold_t *CmdPtr3 = (T4_ObsThreshold_t *) MsgPtr;
+                g_T4_AppData.HkTlm.obs_threshold = CmdPtr3->obs_threshold;
                 break;
-            case T4_SET_CRT_TLD_CC:;
-                T4_CriticalThreshold_t *CmdPtr4 = (T4_CriticalThreshold_t *) MsgPtr;
-                g_T4_AppData.HkTlm.critical_threshold = CmdPtr4->critical_threshold;
+            case T4_SET_LVR_TLD_CC:; //Set louver threshold to specific value
+                T4_LouverThreshold_t *CmdPtr4 = (T4_LouverThreshold_t *) MsgPtr;
+                g_T4_AppData.HkTlm.louver_threshold = CmdPtr4->louver_threshold;
                 break;
-            case T4_SET_HEAT_TLD_CC:;
-                T4_HeatThreshold_t *CmdPtr5 = (T4_HeatThreshold_t *) MsgPtr;
-                g_T4_AppData.HkTlm.heat_threshold = CmdPtr5->heat_threshold;
+            case T4_SET_CRT_TLD_CC:; //Set health critical threshold to specific value
+                T4_CriticalThreshold_t *CmdPtr5 = (T4_CriticalThreshold_t *) MsgPtr;
+                g_T4_AppData.HkTlm.critical_threshold = CmdPtr5->critical_threshold;
                 break;
-            case T4_SET_ACTIVE_CAP_CC:;
-                T4_ActiveCap_t *CmdPtr6 = (T4_ActiveCap_t *) MsgPtr;
-                g_T4_AppData.HkTlm.active_cap = CmdPtr6->active_cap;
+            case T4_SET_HEAT_TLD_CC:; //Set heat threshold to specific value
+                T4_HeatThreshold_t *CmdPtr6 = (T4_HeatThreshold_t *) MsgPtr;
+                g_T4_AppData.HkTlm.heat_threshold = CmdPtr6->heat_threshold;
                 break;
-            case T4_SET_VERBOSITY_CC:
-            case T4_GET_OBS_VALUE_CC:
-            case T4_GET_CAP_CHARGE_CC:
-            case T4_GET_LVR_VALUE_CC:
+            case T4_SET_VERBOSITY_CC:; //Change the verbosity of the app
+                break;
+            case T4_SET_OBS_STATE_CC:; //Set obs state
+                T4_ObsState_t *CmdPtr7 = (T4_ObsState_t *) MsgPtr;
+                g_T4_AppData.HkTlm.obs = CmdPtr7->obs;
+            case T4_SET_LVR_STATE_CC:; //Set louver state
+                T4_LouverState_t *CmdPtr8 = (T4_LouverState_t *) MsgPtr;
+                g_T4_AppData.HkTlm.louver = CmdPtr8->louver;
+            case T4_SET_HEAT_STATE_CC:; //Set heat state
+                T4_HeatState_t *CmdPtr9 = (T4_HeatState_t *) MsgPtr;
+                g_T4_AppData.HkTlm.heat = CmdPtr9->heat;
+            case T4_GET_CAP_CHARGE_CC:; //Update capacitor charge values (all)
+            case T4_GET_OBS_STATE_CC:; //Get obs state
+            case T4_GET_LVR_STATE_CC:; //Get louver state
+            case T4_GET_HEAT_STATE_CC:; //Get heat state
 
             default:
                 g_T4_AppData.HkTlm.usCmdErrCnt++;

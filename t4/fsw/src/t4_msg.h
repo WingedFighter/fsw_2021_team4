@@ -39,16 +39,20 @@
 #define T4_NOOP_CC                 0
 #define T4_RESET_CC                1
 #define T4_SET_CAP_STATE_CC        2
-#define T4_SET_HEALTH_CC           3
-#define T4_SET_OBS_TLD_CC          4
-#define T4_GET_OBS_VALUE_CC        5
+#define T4_SET_ACTIVE_CAP_CC       3
+#define T4_SET_HEALTH_CC           4
+#define T4_SET_OBS_TLD_CC          5
 #define T4_SET_LVR_TLD_CC          6
 #define T4_SET_CRT_TLD_CC          7
 #define T4_SET_HEAT_TLD_CC         8
-#define T4_SET_ACTIVE_CAP_CC       9
-#define T4_SET_VERBOSITY_CC        10
-#define T4_GET_CAP_CHARGE_CC       11
-#define T4_GET_LVR_VALUE_CC        12
+#define T4_SET_VERBOSITY_CC        9
+#define T4_SET_OBS_STATE_CC        10
+#define T4_SET_LVR_STATE_CC        11
+#define T4_SET_HEAT_STATE_CC       12
+#define T4_GET_CAP_CHARGE_CC       13
+#define T4_GET_OBS_STATE_CC        14
+#define T4_GET_LVR_STATE_CC        15
+#define T4_GET_HEAT_STATE_CC       16
 
 /*
 ** Local Structure Declarations
@@ -65,6 +69,7 @@ typedef struct
     uint8              health;
     uint8              louver;
     uint8              obs;
+    uint8              heat;
     uint8              active_cap;
     uint8              heat_threshold;
     uint8              critical_threshold;
@@ -129,6 +134,27 @@ typedef struct
 
     uint8              health_threshold;
 } T4_HealthThreshold_t;
+
+typedef struct
+{
+    uint8              CmdHeader[CFE_SB_CMD_HDR_SIZE];
+
+    uint8              obs;
+} T4_ObsState_t;
+
+typedef struct
+{
+    uint8              CmdHeader[CFE_SB_CMD_HDR_SIZE];
+
+    uint8              louver;
+} T4_LouverState_t;
+
+typedef struct
+{
+    uint8              CmdHeader[CFE_SB_CMD_HDR_SIZE];
+
+    uint8              heat;
+} T4_HeatState_t;
 
 #endif /* _T4_MSG_H_ */
 
