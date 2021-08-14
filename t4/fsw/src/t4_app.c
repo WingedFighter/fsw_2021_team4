@@ -807,9 +807,17 @@ void T4_ProcessNewAppCmds(CFE_SB_Msg_t* MsgPtr)
 
             /* TODO:  Add code to process the rest of the T4 commands here */
 
-            case T4_SET_CAP_STATE_CC:; //Set Cap State to specific value
-                T4_CapState_t *CmdPtr = (T4_CapState_t *) MsgPtr;
-                g_T4_AppData.HkTlm.cap_state = CmdPtr->cap_state;
+            case T4_SET_CAP_A_STATE_CC:; //Set Cap State to specific value
+                T4_CapAState_t *CmdPtr = (T4_CapAState_t *) MsgPtr;
+                g_T4_AppData.HkTlm.cap_a_state = CmdPtr->cap_a_state;
+                break;
+            case T4_SET_CAP_B_STATE_CC:; //Set Cap State to specific value
+                T4_CapBState_t *CmdPtr = (T4_CapBState_t *) MsgPtr;
+                g_T4_AppData.HkTlm.cap_b_state = CmdPtr->cap_b_state;
+                break;
+            case T4_SET_CAP_C_STATE_CC:; //Set Cap State to specific value
+                T4_CapCState_t *CmdPtr = (T4_CapCState_t *) MsgPtr;
+                g_T4_AppData.HkTlm.cap_c_state = CmdPtr->cap_c_state;
                 break;
             case T4_SET_ACTIVE_CAP_CC:; //Set Active Cap to specific value
                 T4_ActiveCap_t *CmdPtr1 = (T4_ActiveCap_t *) MsgPtr;
@@ -846,7 +854,9 @@ void T4_ProcessNewAppCmds(CFE_SB_Msg_t* MsgPtr)
             case T4_SET_HEAT_STATE_CC:; //Set heat state
                 T4_HeatState_t *CmdPtr9 = (T4_HeatState_t *) MsgPtr;
                 g_T4_AppData.HkTlm.heat = CmdPtr9->heat;
-            case T4_GET_CAP_CHARGE_CC:; //Update capacitor charge values (all)
+            case T4_GET_CAP_A_CHARGE_CC:; //Update capacitor charge values (A)
+            case T4_GET_CAP_B_CHARGE_CC:; //Update capacitor charge values (B)
+            case T4_GET_CAP_C_CHARGE_CC:; //Update capacitor charge values (C)
             case T4_GET_OBS_STATE_CC:; //Get obs state
             case T4_GET_LVR_STATE_CC:; //Get louver state
             case T4_GET_HEAT_STATE_CC:; //Get heat state

@@ -27,9 +27,10 @@
 #define T4_OUT_DATA_MID        	0x18D1
 
 #define T4_HK_TLM_MID		0x08BB
-
-    
-
+#define T4_HEALTH_CRITICAL      0x08BD
+#define T4_CAP_A_DISCHARGE      0x08BE
+#define T4_CAP_B_DISCHARGE      0x08BF
+#define T4_CAP_C_DISCHARGE      0x08C0
 
 #endif /* _T4_MSGIDS_H_ */
 

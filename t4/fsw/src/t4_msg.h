@@ -38,21 +38,25 @@
 */
 #define T4_NOOP_CC                 0
 #define T4_RESET_CC                1
-#define T4_SET_CAP_STATE_CC        2
-#define T4_SET_ACTIVE_CAP_CC       3
-#define T4_SET_HEALTH_CC           4
-#define T4_SET_OBS_TLD_CC          5
-#define T4_SET_LVR_TLD_CC          6
-#define T4_SET_CRT_TLD_CC          7
-#define T4_SET_HEAT_TLD_CC         8
-#define T4_SET_VERBOSITY_CC        9
-#define T4_SET_OBS_STATE_CC        10
-#define T4_SET_LVR_STATE_CC        11
-#define T4_SET_HEAT_STATE_CC       12
-#define T4_GET_CAP_CHARGE_CC       13
-#define T4_GET_OBS_STATE_CC        14
-#define T4_GET_LVR_STATE_CC        15
-#define T4_GET_HEAT_STATE_CC       16
+#define T4_SET_CAP_A_STATE_CC      2
+#define T4_SET_CAP_B_STATE_CC      3
+#define T4_SET_CAP_C_STATE_CC      4
+#define T4_SET_ACTIVE_CAP_CC       5
+#define T4_SET_HEALTH_CC           6
+#define T4_SET_OBS_TLD_CC          7
+#define T4_SET_LVR_TLD_CC          8
+#define T4_SET_CRT_TLD_CC          9
+#define T4_SET_HEAT_TLD_CC         10
+#define T4_SET_VERBOSITY_CC        11
+#define T4_SET_OBS_STATE_CC        12
+#define T4_SET_LVR_STATE_CC        13
+#define T4_SET_HEAT_STATE_CC       14
+#define T4_GET_CAP_A_CHARGE_CC     15
+#define T4_GET_CAP_B_CHARGE_CC     16
+#define T4_GET_CAP_C_CHARGE_CC     17
+#define T4_GET_OBS_STATE_CC        18
+#define T4_GET_LVR_STATE_CC        19
+#define T4_GET_HEAT_STATE_CC       20
 
 /*
 ** Local Structure Declarations
@@ -64,8 +68,12 @@ typedef struct
     uint8              usCmdErrCnt;
 
     /* TODO:  Add declarations for additional housekeeping data here */
-    uint8              cap_charge;
-    uint8              cap_state;
+    uint8              cap_a_charge;
+    uint8              cap_a_state;
+    uint8              cap_b_charge;
+    uint8              cap_b_state;
+    uint8              cap_c_charge;
+    uint8              cap_c_state;
     uint8              health;
     uint8              louver;
     uint8              obs;
@@ -85,6 +93,27 @@ typedef struct
 
     uint8              cap_state;
 } T4_CapState_t;
+
+typedef struct
+{
+    uint8              CmdHeader[CFE_SB_CMD_HDR_SIZE];
+
+    uint8              cap_a_state;
+} T4_CapAState_t;
+
+typedef struct
+{
+    uint8              CmdHeader[CFE_SB_CMD_HDR_SIZE];
+
+    uint8              cap_b_state;
+} T4_CapBState_t;
+
+typedef struct
+{
+    uint8              CmdHeader[CFE_SB_CMD_HDR_SIZE];
+
+    uint8              cap_c_state;
+} T4_CapCState_t;
 
 typedef struct
 {
