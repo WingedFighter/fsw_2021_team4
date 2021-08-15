@@ -68,22 +68,22 @@ typedef struct
     uint8              usCmdErrCnt;
 
     /* TODO:  Add declarations for additional housekeeping data here */
-    uint8              cap_a_charge;
-    uint8              cap_a_state;
-    uint8              cap_b_charge;
-    uint8              cap_b_state;
-    uint8              cap_c_charge;
-    uint8              cap_c_state;
-    uint8              health;
-    uint8              louver;
-    uint8              obs;
-    uint8              heat;
-    uint8              active_cap;
-    uint8              heat_threshold;
-    uint8              critical_threshold;
-    uint8              obs_threshold;
-    uint8              louver_threshold;
-    uint8              health_threshold;
+    uint16             cap_a_charge;
+    uint16             cap_a_state;
+    uint16             cap_b_charge;
+    uint16             cap_b_state;
+    uint16             cap_c_charge;
+    uint16             cap_c_state;
+    uint16             health;
+    uint16             louver;
+    uint16             obs;
+    uint16             heat;
+    uint16             active_cap;
+    uint16             heat_threshold;
+    uint16             critical_threshold;
+    uint16             obs_threshold;
+    uint16             louver_threshold;
+    uint16             health_threshold;
 
 } T4_HkTlm_t;
 
@@ -113,105 +113,8 @@ typedef struct
 typedef struct
 {
     uint8              CmdHeader[CFE_SB_CMD_HDR_SIZE];
-} T4_DefaultCommand_t;
-
-typedef struct
-{
-    uint8              CmdHeader[CFE_SB_CMD_HDR_SIZE];
-
-    uint8              cap_state;
-} T4_CapState_t;
-
-typedef struct
-{
-    uint8              CmdHeader[CFE_SB_CMD_HDR_SIZE];
-
-    uint8              cap_a_state;
-} T4_CapAState_t;
-
-typedef struct
-{
-    uint8              CmdHeader[CFE_SB_CMD_HDR_SIZE];
-
-    uint8              cap_b_state;
-} T4_CapBState_t;
-
-typedef struct
-{
-    uint8              CmdHeader[CFE_SB_CMD_HDR_SIZE];
-
-    uint8              cap_c_state;
-} T4_CapCState_t;
-
-typedef struct
-{
-    uint8              CmdHeader[CFE_SB_CMD_HDR_SIZE];
-
-    uint8              health;
-} T4_Health_t;
-
-typedef struct
-{
-    uint8              CmdHeader[CFE_SB_CMD_HDR_SIZE];
-
-    uint8              heat_threshold;
-} T4_HeatThreshold_t;
-
-typedef struct
-{
-    uint8              CmdHeader[CFE_SB_CMD_HDR_SIZE];
-
-    uint8              critical_threshold;
-} T4_CriticalThreshold_t;
-
-typedef struct
-{
-    uint8              CmdHeader[CFE_SB_CMD_HDR_SIZE];
-
-    uint8              active_cap;
-} T4_ActiveCap_t;
-
-typedef struct
-{
-    uint8              CmdHeader[CFE_SB_CMD_HDR_SIZE];
-
-    uint8              obs_threshold;
-} T4_ObsThreshold_t;
-
-typedef struct
-{
-    uint8              CmdHeader[CFE_SB_CMD_HDR_SIZE];
-
-    uint8              louver_threshold;
-} T4_LouverThreshold_t;
-
-typedef struct
-{
-    uint8              CmdHeader[CFE_SB_CMD_HDR_SIZE];
-
-    uint8              health_threshold;
-} T4_HealthThreshold_t;
-
-typedef struct
-{
-    uint8              CmdHeader[CFE_SB_CMD_HDR_SIZE];
-
-    uint8              obs;
-} T4_ObsState_t;
-
-typedef struct
-{
-    uint8              CmdHeader[CFE_SB_CMD_HDR_SIZE];
-
-    uint8              louver;
-} T4_LouverState_t;
-
-typedef struct
-{
-    uint8              CmdHeader[CFE_SB_CMD_HDR_SIZE];
-
-    uint8              heat;
-} T4_HeatState_t;
+    uint16             target;
+} T4_ParmCmd_t;
 
 typedef struct
 {
