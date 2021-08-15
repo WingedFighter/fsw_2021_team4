@@ -97,7 +97,7 @@ typedef struct
 ** Local Variables
 */
 
-T4_Wise_Tlm_t* wise_tlm;
+T4_Wise_Tlm_t wise_tlm;
 
 /*
 ** Local Function Prototypes
