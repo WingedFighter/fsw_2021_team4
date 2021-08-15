@@ -44,6 +44,7 @@
 #include "whe_msgids.h"
 #include "sch_msgids.h"
 #include "t4_msgids.h"
+#include "wise_msgids.h"
 
 
 /*************************************************************************
@@ -176,7 +177,7 @@ SCH_MessageEntry_t SCH_DefaultMessageTable[SCH_MAX_MESSAGES] =
     /* command ID #26 - T4 1 Hz Wakeup */
   { { CFE_MAKE_BIG16(T4_WAKEUP_MID),       CFE_MAKE_BIG16(0xC000), CFE_MAKE_BIG16(0x0001), 0x0000  } },
     /* command ID #27 */
-  { { CFE_MAKE_BIG16(SCH_UNUSED_MID) } },
+  { { CFE_MAKE_BIG16(WISE_WAKEUP_MID),       CFE_MAKE_BIG16(0xC000), CFE_MAKE_BIG16(0x0001), 0x0000  } },
     /* command ID #28 */
   { { CFE_MAKE_BIG16(SCH_UNUSED_MID) } },
     /* command ID #29 */

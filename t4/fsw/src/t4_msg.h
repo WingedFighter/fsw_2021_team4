@@ -89,6 +89,34 @@ typedef struct
 
 typedef struct
 {
+    uint8              TlmHeader[CFE_SB_TLM_HDR_SIZE];
+    uint8              usCmdCnt;
+    uint8              usCmdErrCnt;
+
+    uint16             wiseSbcState;
+    uint16             wiseDamage;
+    uint16             wiseActiveCap;
+    uint16             wiseCapA_State;
+    uint16             wiseCapA_Charge;
+    uint16             wiseCapB_State;
+    uint16             wiseCapB_Charge;
+    uint16             wiseCapC_State;
+    uint16             wiseCapC_Charge;
+    uint16             wiseHtrA_State;
+    uint16             wiseHtrB_State;
+    uint16             wiseLvrA_State;
+    uint16             wiseLvrB_State;
+    uint16             wiseSSR_Count;
+    int16              wiseTemp;
+} T4_Wise_Tlm_t;
+
+typedef struct
+{
+    uint8              CmdHeader[CFE_SB_CMD_HDR_SIZE];
+} T4_DefaultCommand_t;
+
+typedef struct
+{
     uint8              CmdHeader[CFE_SB_CMD_HDR_SIZE];
 
     uint8              cap_state;
@@ -184,6 +212,12 @@ typedef struct
 
     uint8              heat;
 } T4_HeatState_t;
+
+typedef struct
+{
+    uint8              CmdHeader[CFE_SB_CMD_HDR_SIZE];
+    uint16             target;
+} T4_WISE_ParmCmd_t;
 
 #endif /* _T4_MSG_H_ */
 

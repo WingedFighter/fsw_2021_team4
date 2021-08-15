@@ -83,8 +83,6 @@ typedef struct
     /* Housekeeping telemetry - for downlink only.
        Data structure should be defined in t4/fsw/src/t4_msg.h */
     T4_HkTlm_t  HkTlm;
-
-    /* TODO:  Add declarations for additional private data here */
 } T4_AppData_t;
 
 /*
@@ -98,6 +96,8 @@ typedef struct
 /*
 ** Local Variables
 */
+
+T4_Wise_Tlm_t* wise_tlm;
 
 /*
 ** Local Function Prototypes
@@ -119,6 +119,12 @@ void  T4_ProcessNewAppCmds(CFE_SB_Msg_t*);
 
 void  T4_ReportHousekeeping(void);
 void  T4_SendOutData(void);
+
+void  T4_ManageCaps(void);
+void  T4_dischargeCaps(void);
+
+uint16 getActiveCharge(void);
+int   calcActiveCap(void);
 
 boolean  T4_VerifyCmdLength(CFE_SB_Msg_t*, uint16);
 

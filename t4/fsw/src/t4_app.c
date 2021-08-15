@@ -45,6 +45,7 @@
 #include "t4_mission_cfg.h"
 #include "t4_app.h"
 #include "t4_msg.h"
+#include "wise_msgids.h"
 
 /*
 ** Local Defines
@@ -273,6 +274,7 @@ int32 T4_InitPipe()
         ** Examples:
         **     CFE_SB_Subscribe(GNCEXEC_OUT_DATA_MID, g_T4_AppData.TlmPipeId);
         */
+        CFE_SB_Subscribe(WISE_HK_TLM_MID, g_T4_AppData.TlmPipeId);
     }
     else
     {
@@ -340,6 +342,8 @@ int32 T4_InitData()
     memset((void*)&g_T4_AppData.HkTlm, 0x00, sizeof(g_T4_AppData.HkTlm));
     CFE_SB_InitMsg(&g_T4_AppData.HkTlm,
                    T4_HK_TLM_MID, sizeof(g_T4_AppData.HkTlm), TRUE);
+
+    memset((void*)&wise_tlm, 0x00, sizeof(wise_tlm));
 
     return (iStatus);
 }
@@ -539,6 +543,7 @@ int32 T4_RcvMsg(int32 iBlocking)
                 T4_ProcessNewData();
 
                 /* TODO:  Add more code here to handle other things when app wakes up */
+                T4_ManageCaps();
 
                 /* The last thing to do at the end of this Wakeup cycle should be to
                    automatically publish new output. */
@@ -629,6 +634,30 @@ void T4_ProcessNewData()
                 **         T4_ProcessNavData(TlmMsgPtr);
                 **         break;
                 */
+                case WISE_HK_TLM_MID:;
+                    wise_tlm = (T4_Wise_Tlm_t *) TlmMsgPtr;
+
+                    CFE_EVS_SendEvent(T4_CMD_INF_EID, CFE_EVS_INFORMATION,
+                                      "T4 - wiseSbcState (%u)",
+                                      wise_tlm->wiseSbcState);
+
+                    CFE_EVS_SendEvent(T4_CMD_INF_EID, CFE_EVS_INFORMATION,
+                                      "T4 - wiseDamage (%u)",
+                                      wise_tlm->wiseDamage);
+
+                    CFE_EVS_SendEvent(T4_CMD_INF_EID, CFE_EVS_INFORMATION,
+                                      "T4 - wiseCapACharge (%u)",
+                                      wise_tlm->wiseCapA_Charge);
+
+                    CFE_EVS_SendEvent(T4_CMD_INF_EID, CFE_EVS_INFORMATION,
+                                      "T4 - wiseCapBCharge (%u)",
+                                      wise_tlm->wiseCapB_Charge);
+
+                    CFE_EVS_SendEvent(T4_CMD_INF_EID, CFE_EVS_INFORMATION,
+                                      "T4 - wiseCapCCharge (%u)",
+                                      wise_tlm->wiseCapC_Charge);
+
+                    break;
 
                 default:
                     CFE_EVS_SendEvent(T4_MSGID_ERR_EID, CFE_EVS_ERROR,
@@ -808,16 +837,16 @@ void T4_ProcessNewAppCmds(CFE_SB_Msg_t* MsgPtr)
             /* TODO:  Add code to process the rest of the T4 commands here */
 
             case T4_SET_CAP_A_STATE_CC:; //Set Cap State to specific value
-                T4_CapAState_t *CmdPtr = (T4_CapAState_t *) MsgPtr;
-                g_T4_AppData.HkTlm.cap_a_state = CmdPtr->cap_a_state;
+                T4_CapAState_t *CmdPtrA = (T4_CapAState_t *) MsgPtr;
+                g_T4_AppData.HkTlm.cap_a_state = CmdPtrA->cap_a_state;
                 break;
             case T4_SET_CAP_B_STATE_CC:; //Set Cap State to specific value
-                T4_CapBState_t *CmdPtr = (T4_CapBState_t *) MsgPtr;
-                g_T4_AppData.HkTlm.cap_b_state = CmdPtr->cap_b_state;
+                T4_CapBState_t *CmdPtrB = (T4_CapBState_t *) MsgPtr;
+                g_T4_AppData.HkTlm.cap_b_state = CmdPtrB->cap_b_state;
                 break;
             case T4_SET_CAP_C_STATE_CC:; //Set Cap State to specific value
-                T4_CapCState_t *CmdPtr = (T4_CapCState_t *) MsgPtr;
-                g_T4_AppData.HkTlm.cap_c_state = CmdPtr->cap_c_state;
+                T4_CapCState_t *CmdPtrC = (T4_CapCState_t *) MsgPtr;
+                g_T4_AppData.HkTlm.cap_c_state = CmdPtrC->cap_c_state;
                 break;
             case T4_SET_ACTIVE_CAP_CC:; //Set Active Cap to specific value
                 T4_ActiveCap_t *CmdPtr1 = (T4_ActiveCap_t *) MsgPtr;
@@ -860,7 +889,6 @@ void T4_ProcessNewAppCmds(CFE_SB_Msg_t* MsgPtr)
             case T4_GET_OBS_STATE_CC:; //Get obs state
             case T4_GET_LVR_STATE_CC:; //Get louver state
             case T4_GET_HEAT_STATE_CC:; //Get heat state
-
             default:
                 g_T4_AppData.HkTlm.usCmdErrCnt++;
                 CFE_EVS_SendEvent(T4_MSGID_ERR_EID, CFE_EVS_ERROR,
@@ -1104,7 +1132,193 @@ void T4_AppMain()
 
     /* Exit the application */
     CFE_ES_ExitApp(g_T4_AppData.uiRunStatus);
-} 
+}
+
+void T4_ManageCaps()
+{
+    if (calcActiveCap() != -1)
+    {
+        T4_WISE_ParmCmd_t* temp_parm;
+        temp_parm->target = g_T4_AppData.HkTlm.active_cap;
+        CFE_SB_Msg_t* temp_msg = (CFE_SB_Msg_t*) &temp_parm;
+        CFE_SB_SetCmdCode(temp_msg, 1);
+        CFE_SB_SendMsg(temp_msg);
+    }
+
+    if (getActiveCharge() > g_T4_AppData.HkTlm.obs_threshold)
+    {
+        T4_DefaultCommand_t* temp_parm;
+        CFE_SB_Msg_t* temp_msg = (CFE_SB_Msg_t*) &temp_parm;
+        CFE_SB_SetCmdCode(temp_msg, 5);
+        CFE_SB_SendMsg(temp_msg);
+    }
+
+    if (getActiveCharge() < g_T4_AppData.HkTlm.critical_threshold)
+    {
+        g_T4_AppData.HkTlm.health = 1;
+        T4_DefaultCommand_t* temp_parm;
+        CFE_SB_Msg_t* temp_msg = (CFE_SB_Msg_t*) &temp_parm;
+        CFE_SB_SetCmdCode(temp_msg, 6);
+        CFE_SB_SendMsg(temp_msg);
+    }
+    else
+    {
+        g_T4_AppData.HkTlm.health = 0;
+    }
+
+    dischargeCaps();
+}
+
+void dischargeCaps()
+{
+    if (g_T4_AppData.HkTlm.active_cap == 0)
+    {
+        if (wise_tlm->wiseCapB_Charge > 8500 && wise_tlm->wiseCapB_State < 2)
+        {
+            T4_WISE_ParmCmd_t* temp_parm;
+            temp_parm->target = 1;
+            CFE_SB_Msg_t* temp_msg = (CFE_SB_Msg_t*) &temp_parm;
+            CFE_SB_SetCmdCode(temp_msg, 2);
+            CFE_SB_SendMsg(temp_msg);
+        }
+        if (wise_tlm->wiseCapC_Charge > 8500 && wise_tlm->wiseCapC_State < 2)
+        {
+            T4_WISE_ParmCmd_t* temp_parm;
+            temp_parm->target = 2;
+            CFE_SB_Msg_t* temp_msg = (CFE_SB_Msg_t*) &temp_parm;
+            CFE_SB_SetCmdCode(temp_msg, 2);
+            CFE_SB_SendMsg(temp_msg);
+        }
+    }
+    else if (g_T4_AppData.HkTlm.active_cap == 1)
+    {
+        if (wise_tlm->wiseCapA_Charge > 8500 && wise_tlm->wiseCapA_State < 2)
+        {
+            T4_WISE_ParmCmd_t* temp_parm;
+            temp_parm->target = 0;
+            CFE_SB_Msg_t* temp_msg = (CFE_SB_Msg_t*) &temp_parm;
+            CFE_SB_SetCmdCode(temp_msg, 2);
+            CFE_SB_SendMsg(temp_msg);
+        }
+        if (wise_tlm->wiseCapC_Charge > 8500 && wise_tlm->wiseCapC_State < 2)
+        {
+            T4_WISE_ParmCmd_t* temp_parm;
+            temp_parm->target = 2;
+            CFE_SB_Msg_t* temp_msg = (CFE_SB_Msg_t*) &temp_parm;
+            CFE_SB_SetCmdCode(temp_msg, 2);
+            CFE_SB_SendMsg(temp_msg);
+        }
+    }
+    else if (g_T4_AppData.HkTlm.active_cap == 2)
+    {
+        if (wise_tlm->wiseCapB_Charge > 8500 && wise_tlm->wiseCapB_State < 2)
+        {
+            T4_WISE_ParmCmd_t* temp_parm;
+            temp_parm->target = 1;
+            CFE_SB_Msg_t* temp_msg = (CFE_SB_Msg_t*) &temp_parm;
+            CFE_SB_SetCmdCode(temp_msg, 2);
+            CFE_SB_SendMsg(temp_msg);
+        }
+        if (wise_tlm->wiseCapA_Charge > 8500 && wise_tlm->wiseCapA_State < 2)
+        {
+            T4_WISE_ParmCmd_t* temp_parm;
+            temp_parm->target = 0;
+            CFE_SB_Msg_t* temp_msg = (CFE_SB_Msg_t*) &temp_parm;
+            CFE_SB_SetCmdCode(temp_msg, 2);
+            CFE_SB_SendMsg(temp_msg);
+        }
+    }
+}
+
+uint16 getActiveCharge()
+{
+    if (g_T4_AppData.HkTlm.active_cap == 0)
+    {
+        return wise_tlm->wiseCapA_Charge;
+    }
+    else if (g_T4_AppData.HkTlm.active_cap == 1)
+    {
+        return wise_tlm->wiseCapB_Charge;
+    }
+    else
+    {
+        return wise_tlm->wiseCapC_Charge;
+    }
+}
+
+int calcActiveCap()
+{
+    if (wise_tlm->wiseActiveCap == 0)
+    {
+        if (wise_tlm->wiseCapB_Charge > wise_tlm->wiseCapA_Charge)
+        {
+            if (wise_tlm->wiseCapC_Charge > wise_tlm->wiseCapB_Charge && 
+                wise_tlm->wiseCapC_State < 2)
+            {
+                g_T4_AppData.HkTlm.active_cap = 2;
+                return 2;
+            }
+            else if (wise_tlm->wiseCapB_State < 2)
+            {
+                g_T4_AppData.HkTlm.active_cap = 1;
+                return 1;
+            }
+        }
+        else if (wise_tlm->wiseCapC_Charge > wise_tlm->wiseCapA_Charge && 
+                 wise_tlm->wiseCapC_State < 2)
+        {
+            g_T4_AppData.HkTlm.active_cap = 2;
+            return 2;
+        }
+    }
+    else if (wise_tlm->wiseActiveCap == 1)
+    {
+        if (wise_tlm->wiseCapA_Charge > wise_tlm->wiseCapB_Charge)
+        {
+            if (wise_tlm->wiseCapC_Charge > wise_tlm->wiseCapA_Charge && 
+                wise_tlm->wiseCapC_State < 2)
+            {
+                g_T4_AppData.HkTlm.active_cap = 2;
+                return 2;
+            }
+            else if (wise_tlm->wiseCapA_State < 2)
+            {
+                g_T4_AppData.HkTlm.active_cap = 0;
+                return 0;
+            }
+        }
+        else if (wise_tlm->wiseCapC_Charge > wise_tlm->wiseCapB_Charge && 
+                 wise_tlm->wiseCapC_State < 2)
+        {
+            g_T4_AppData.HkTlm.active_cap = 2;
+            return 2;
+        }
+    }
+    else if (wise_tlm->wiseActiveCap == 2)
+    {
+        if (wise_tlm->wiseCapA_Charge > wise_tlm->wiseCapC_Charge)
+        {
+            if (wise_tlm->wiseCapB_Charge > wise_tlm->wiseCapA_Charge && 
+                wise_tlm->wiseCapB_State < 2)
+            {
+                g_T4_AppData.HkTlm.active_cap = 1;
+                return 1;
+            }
+            else if (wise_tlm->wiseCapA_State < 2)
+            {
+                g_T4_AppData.HkTlm.active_cap = 0;
+                return 0;
+            }
+        }
+        else if (wise_tlm->wiseCapB_Charge > wise_tlm->wiseCapC_Charge && 
+                 wise_tlm->wiseCapB_State < 2)
+        {
+            g_T4_AppData.HkTlm.active_cap = 1;
+            return 1;
+        }
+    }
+    return -1;
+}
     
 /*=======================================================================================
 ** End of file t4_app.c
