@@ -57,6 +57,15 @@
 #define T4_GET_OBS_STATE_CC        18
 #define T4_GET_LVR_STATE_CC        19
 #define T4_GET_HEAT_STATE_CC       20
+#define WISE_CAP_ACTIVE_CC         1
+#define WISE_CAP_DISCHARGE_CC	   2
+#define WISE_HTR_TOGGLE_CC	   3
+#define WISE_LVR_TOGGLE_CC         4
+#define WISE_OBS_START_CC          5
+#define WISE_OBS_STOP_CC           6
+#define WISE_POWER_SBC_CC          7
+#define WISE_SEND_OBS_CC           8
+#define WISE_TLM_RESET_CNTS_CC     9
 
 /*
 ** Local Structure Declarations

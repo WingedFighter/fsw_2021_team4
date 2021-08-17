@@ -1139,106 +1139,116 @@ void T4_AppMain()
 void T4_ManageCaps()
 {
 
-    if (calcActiveCap() != -1)
+    if (calcActiveCap() != -1 && calcActiveCap() != wise_tlm.wiseActiveCap)
     {
         T4_WISE_ParmCmd_t temp_parm;
+        CFE_SB_InitMsg(&temp_parm, WISE_CMD_MID, sizeof(temp_parm), TRUE);
         temp_parm.target = g_T4_AppData.HkTlm.active_cap;
-        CFE_SB_Msg_t* temp_msg = (CFE_SB_Msg_t*) &temp_parm;
-        CFE_SB_SetCmdCode(temp_msg, 1);
-        CFE_SB_SetMsgId(temp_msg, WISE_CMD_MID);
-        CFE_SB_SendMsg(temp_msg);
+        CFE_SB_SetCmdCode((CFE_SB_Msg_t*)&temp_parm, WISE_CAP_ACTIVE_CC);
+        CFE_SB_SendMsg((CFE_SB_Msg_t*)&temp_parm);
     }
 
-    if (getActiveCharge() > g_T4_AppData.HkTlm.obs_threshold)
+    //if (getActiveCharge() > g_T4_AppData.HkTlm.obs_threshold)
+    if (getActiveCharge() > 8500)
     {
         T4_WISE_ParmCmd_t temp_parm;
-        CFE_SB_Msg_t* temp_msg = (CFE_SB_Msg_t*) &temp_parm;
-        CFE_SB_SetCmdCode(temp_msg, 5);
-        CFE_SB_SetMsgId(temp_msg, WISE_CMD_MID);
-        CFE_SB_SendMsg(temp_msg);
+        CFE_SB_InitMsg(&temp_parm, WISE_CMD_MID, sizeof(temp_parm), TRUE);
+        CFE_SB_SetCmdCode((CFE_SB_Msg_t*)&temp_parm, WISE_OBS_START_CC);
+        CFE_SB_SendMsg((CFE_SB_Msg_t*)&temp_parm);
+        g_T4_AppData.HkTlm.obs = 1;
     }
 
-    if (getActiveCharge() < g_T4_AppData.HkTlm.critical_threshold)
+    if (getActiveCharge() < g_T4_AppData.HkTlm.critical_threshold && g_T4_AppData.HkTlm.obs == 1)
     {
         g_T4_AppData.HkTlm.health = 1;
+        g_T4_AppData.HkTlm.obs = 0;
         T4_WISE_ParmCmd_t temp_parm;
-        CFE_SB_Msg_t* temp_msg = (CFE_SB_Msg_t*) &temp_parm;
-        CFE_SB_SetCmdCode(temp_msg, 6);
-        CFE_SB_SetMsgId(temp_msg, WISE_CMD_MID);
-        CFE_SB_SendMsg(temp_msg);
+        CFE_SB_InitMsg(&temp_parm, WISE_CMD_MID, sizeof(temp_parm), TRUE);
+        CFE_SB_SetCmdCode((CFE_SB_Msg_t*)&temp_parm, WISE_OBS_STOP_CC);
+        CFE_SB_SendMsg((CFE_SB_Msg_t*)&temp_parm);
     }
-    else
+    else if (getActiveCharge() > g_T4_AppData.HkTlm.critical_threshold)
     {
         g_T4_AppData.HkTlm.health = 0;
     }
+    else
+    {
+        g_T4_AppData.HkTlm.health = 1;
+    }
 
-    dischargeCaps();
+    T4_dischargeCaps();
 
 }
 
-void dischargeCaps()
+void T4_dischargeCaps()
 {
-    if (g_T4_AppData.HkTlm.active_cap == 0)
+    if (g_T4_AppData.HkTlm.active_cap == 0 && wise_tlm.wiseActiveCap == 0)
     {
         if (wise_tlm.wiseCapB_Charge > 8500 && wise_tlm.wiseCapB_State < 2)
         {
+            CFE_EVS_SendEvent(T4_CMD_INF_EID, CFE_EVS_INFORMATION,
+                              "ACT: A, DIS: B");
             T4_WISE_ParmCmd_t temp_parm;
+            CFE_SB_InitMsg(&temp_parm, WISE_CMD_MID, sizeof(temp_parm), TRUE);
             temp_parm.target = 1;
-            CFE_SB_Msg_t* temp_msg = (CFE_SB_Msg_t*) &temp_parm;
-            CFE_SB_SetCmdCode(temp_msg, 2);
-            CFE_SB_SetMsgId(temp_msg, WISE_CMD_MID);
-            CFE_SB_SendMsg(temp_msg);
+            CFE_SB_SetCmdCode((CFE_SB_Msg_t*)&temp_parm, WISE_CAP_DISCHARGE_CC);
+            CFE_SB_SendMsg((CFE_SB_Msg_t*)&temp_parm);
         }
         if (wise_tlm.wiseCapC_Charge > 8500 && wise_tlm.wiseCapC_State < 2)
         {
+            CFE_EVS_SendEvent(T4_CMD_INF_EID, CFE_EVS_INFORMATION,
+                              "ACT: A, DIS: C");
             T4_WISE_ParmCmd_t temp_parm;
+            CFE_SB_InitMsg(&temp_parm, WISE_CMD_MID, sizeof(temp_parm), TRUE);
             temp_parm.target = 2;
-            CFE_SB_Msg_t* temp_msg = (CFE_SB_Msg_t*) &temp_parm;
-            CFE_SB_SetCmdCode(temp_msg, 2);
-            CFE_SB_SetMsgId(temp_msg, WISE_CMD_MID);
-            CFE_SB_SendMsg(temp_msg);
+            CFE_SB_SetCmdCode((CFE_SB_Msg_t*)&temp_parm, WISE_CAP_DISCHARGE_CC);
+            CFE_SB_SendMsg((CFE_SB_Msg_t*)&temp_parm);
         }
     }
-    else if (g_T4_AppData.HkTlm.active_cap == 1)
+    else if (g_T4_AppData.HkTlm.active_cap == 1 && wise_tlm.wiseActiveCap == 1)
     {
         if (wise_tlm.wiseCapA_Charge > 8500 && wise_tlm.wiseCapA_State < 2)
         {
+            CFE_EVS_SendEvent(T4_CMD_INF_EID, CFE_EVS_INFORMATION,
+                              "ACT: B, DIS: A");
             T4_WISE_ParmCmd_t temp_parm;
+            CFE_SB_InitMsg(&temp_parm, WISE_CMD_MID, sizeof(temp_parm), TRUE);
             temp_parm.target = 0;
-            CFE_SB_Msg_t* temp_msg = (CFE_SB_Msg_t*) &temp_parm;
-            CFE_SB_SetCmdCode(temp_msg, 2);
-            CFE_SB_SetMsgId(temp_msg, WISE_CMD_MID);
-            CFE_SB_SendMsg(temp_msg);
+            CFE_SB_SetCmdCode((CFE_SB_Msg_t*)&temp_parm, WISE_CAP_DISCHARGE_CC);
+            CFE_SB_SendMsg((CFE_SB_Msg_t*)&temp_parm);
         }
-        if (wise_tlm.wiseCapC_Charge > 8500 && wise_tlm.wiseCapC_State < 2)
+        else if (wise_tlm.wiseCapC_Charge > 8500 && wise_tlm.wiseCapC_State < 2)
         {
+            CFE_EVS_SendEvent(T4_CMD_INF_EID, CFE_EVS_INFORMATION,
+                              "ACT: B, DIS: C");
             T4_WISE_ParmCmd_t temp_parm;
+            CFE_SB_InitMsg(&temp_parm, WISE_CMD_MID, sizeof(temp_parm), TRUE);
             temp_parm.target = 2;
-            CFE_SB_Msg_t* temp_msg = (CFE_SB_Msg_t*) &temp_parm;
-            CFE_SB_SetCmdCode(temp_msg, 2);
-            CFE_SB_SetMsgId(temp_msg, WISE_CMD_MID);
-            CFE_SB_SendMsg(temp_msg);
+            CFE_SB_SetCmdCode((CFE_SB_Msg_t*)&temp_parm, WISE_CAP_DISCHARGE_CC);
+            CFE_SB_SendMsg((CFE_SB_Msg_t*)&temp_parm);
         }
     }
-    else if (g_T4_AppData.HkTlm.active_cap == 2)
+    else if (g_T4_AppData.HkTlm.active_cap == 2 && wise_tlm.wiseActiveCap == 2)
     {
         if (wise_tlm.wiseCapB_Charge > 8500 && wise_tlm.wiseCapB_State < 2)
         {
+            CFE_EVS_SendEvent(T4_CMD_INF_EID, CFE_EVS_INFORMATION,
+                              "ACT: C, DIS: B");
             T4_WISE_ParmCmd_t temp_parm;
+            CFE_SB_InitMsg(&temp_parm, WISE_CMD_MID, sizeof(temp_parm), TRUE);
             temp_parm.target = 1;
-            CFE_SB_Msg_t* temp_msg = (CFE_SB_Msg_t*) &temp_parm;
-            CFE_SB_SetCmdCode(temp_msg, 2);
-            CFE_SB_SetMsgId(temp_msg, WISE_CMD_MID);
-            CFE_SB_SendMsg(temp_msg);
+            CFE_SB_SetCmdCode((CFE_SB_Msg_t*)&temp_parm, WISE_CAP_DISCHARGE_CC);
+            CFE_SB_SendMsg((CFE_SB_Msg_t*)&temp_parm);
         }
-        if (wise_tlm.wiseCapA_Charge > 8500 && wise_tlm.wiseCapA_State < 2)
+        else if (wise_tlm.wiseCapA_Charge > 8500 && wise_tlm.wiseCapA_State < 2)
         {
+            CFE_EVS_SendEvent(T4_CMD_INF_EID, CFE_EVS_INFORMATION,
+                              "ACT: C, DIS: A");
             T4_WISE_ParmCmd_t temp_parm;
+            CFE_SB_InitMsg(&temp_parm, WISE_CMD_MID, sizeof(temp_parm), TRUE);
             temp_parm.target = 0;
-            CFE_SB_Msg_t* temp_msg = (CFE_SB_Msg_t*) &temp_parm;
-            CFE_SB_SetCmdCode(temp_msg, 2);
-            CFE_SB_SetMsgId(temp_msg, WISE_CMD_MID);
-            CFE_SB_SendMsg(temp_msg);
+            CFE_SB_SetCmdCode((CFE_SB_Msg_t*)&temp_parm, WISE_CAP_DISCHARGE_CC);
+            CFE_SB_SendMsg((CFE_SB_Msg_t*)&temp_parm);
         }
     }
 }
