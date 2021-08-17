@@ -122,6 +122,9 @@ void  T4_SendOutData(void);
 
 void  T4_ManageCaps(void);
 void  T4_dischargeCaps(void);
+void  T4_reboot(void);
+void  T4_sendAvail(void);
+void  T4_dischargeSpecificCap(uint16 cap);
 
 uint16 getActiveCharge(void);
 int   calcActiveCap(void);

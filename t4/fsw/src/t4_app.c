@@ -343,6 +343,10 @@ int32 T4_InitData()
     CFE_SB_InitMsg(&g_T4_AppData.HkTlm,
                    T4_HK_TLM_MID, sizeof(g_T4_AppData.HkTlm), TRUE);
 
+    g_T4_AppData.HkTlm.obs_threshold = 8500;
+    g_T4_AppData.HkTlm.critical_threshold = 1500;
+    g_T4_AppData.HkTlm.health_threshold = 2500;
+
     memset((void*)&wise_tlm, 0x00, sizeof(wise_tlm));
 
     return (iStatus);
@@ -816,60 +820,51 @@ void T4_ProcessNewAppCmds(CFE_SB_Msg_t* MsgPtr)
                 break;
 
             /* TODO:  Add code to process the rest of the T4 commands here */
-
-            case T4_SET_CAP_A_STATE_CC:; //Set Cap State to specific value
+            case T4_DISCHARGE_CAP_CC:; //Discharge cap specified
                 CmdPtr = (T4_ParmCmd_t*) MsgPtr;
-                //g_T4_AppData.HkTlm.cap_a_state = CmdPtr->target;
+                T4_dischargeSpecificCap(CmdPtr->target);
                 break;
-            case T4_SET_CAP_B_STATE_CC:; //Set Cap State to specific value
-                CmdPtr = (T4_ParmCmd_t*) MsgPtr;
-                //g_T4_AppData.HkTlm.cap_b_state = CmdPtr->target;
+            case T4_REBOOT_CC:;
+                T4_reboot();
                 break;
-            case T4_SET_CAP_C_STATE_CC:; //Set Cap State to specific value
-                CmdPtr = (T4_ParmCmd_t*) MsgPtr;
-                //g_T4_AppData.HkTlm.cap_c_state = CmdPtr->target;
+            case T4_GET_OBS_AVAIL_CC:;
+                T4_sendAvail();
                 break;
             case T4_SET_ACTIVE_CAP_CC:; //Set Active Cap to specific value
                 CmdPtr = (T4_ParmCmd_t*) MsgPtr;
-                //g_T4_AppData.HkTlm.active_cap = CmdPtr->target;
+                g_T4_AppData.HkTlm.active_cap = CmdPtr->target;
                 break;
             case T4_SET_HEALTH_CC:; //Set Health state to specific value
                 CmdPtr = (T4_ParmCmd_t*) MsgPtr;
-                //g_T4_AppData.HkTlm.health = CmdPtr->target;
+                g_T4_AppData.HkTlm.health = CmdPtr->target;
                 break;
             case T4_SET_OBS_TLD_CC:; //Set Obs threshold to specific value
                 CmdPtr = (T4_ParmCmd_t*) MsgPtr;
-                //g_T4_AppData.HkTlm.obs_threshold = CmdPtr->target;
+                g_T4_AppData.HkTlm.obs_threshold = CmdPtr->target;
                 break;
             case T4_SET_LVR_TLD_CC:; //Set louver threshold to specific value
                 CmdPtr = (T4_ParmCmd_t*) MsgPtr;
-                //g_T4_AppData.HkTlm.louver_threshold = CmdPtr->target;
+                g_T4_AppData.HkTlm.louver_threshold = CmdPtr->target;
                 break;
             case T4_SET_CRT_TLD_CC:; //Set health critical threshold to specific value
                 CmdPtr = (T4_ParmCmd_t*) MsgPtr;
-                //g_T4_AppData.HkTlm.critical_threshold = CmdPtr->target;
+                g_T4_AppData.HkTlm.critical_threshold = CmdPtr->target;
                 break;
             case T4_SET_HEAT_TLD_CC:; //Set heat threshold to specific value
                 CmdPtr = (T4_ParmCmd_t*) MsgPtr;
-                //g_T4_AppData.HkTlm.heat_threshold = CmdPtr->target;
+                g_T4_AppData.HkTlm.heat_threshold = CmdPtr->target;
                 break;
             case T4_SET_VERBOSITY_CC:; //Change the verbosity of the app
                 break;
             case T4_SET_OBS_STATE_CC:; //Set obs state
                 CmdPtr = (T4_ParmCmd_t*) MsgPtr;
-                //g_T4_AppData.HkTlm.obs = CmdPtr->target;
+                g_T4_AppData.HkTlm.obs = CmdPtr->target;
             case T4_SET_LVR_STATE_CC:; //Set louver state
                 CmdPtr = (T4_ParmCmd_t*) MsgPtr;
-                //g_T4_AppData.HkTlm.louver = CmdPtr->target;
+                g_T4_AppData.HkTlm.louver = CmdPtr->target;
             case T4_SET_HEAT_STATE_CC:; //Set heat state
                 CmdPtr = (T4_ParmCmd_t*) MsgPtr;
-                //g_T4_AppData.HkTlm.heat = CmdPtr->target;
-            case T4_GET_CAP_A_CHARGE_CC:; //Update capacitor charge values (A)
-            case T4_GET_CAP_B_CHARGE_CC:; //Update capacitor charge values (B)
-            case T4_GET_CAP_C_CHARGE_CC:; //Update capacitor charge values (C)
-            case T4_GET_OBS_STATE_CC:; //Get obs state
-            case T4_GET_LVR_STATE_CC:; //Get louver state
-            case T4_GET_HEAT_STATE_CC:; //Get heat state
+                g_T4_AppData.HkTlm.heat = CmdPtr->target;
             default:
                 g_T4_AppData.HkTlm.usCmdErrCnt++;
                 CFE_EVS_SendEvent(T4_MSGID_ERR_EID, CFE_EVS_ERROR,
@@ -1127,8 +1122,7 @@ void T4_ManageCaps()
         CFE_SB_SendMsg((CFE_SB_Msg_t*)&temp_parm);
     }
 
-    //if (getActiveCharge() > g_T4_AppData.HkTlm.obs_threshold)
-    if (getActiveCharge() > 8500)
+    if (getActiveCharge() > g_T4_AppData.HkTlm.obs_threshold)
     {
         T4_WISE_ParmCmd_t temp_parm;
         CFE_SB_InitMsg(&temp_parm, WISE_CMD_MID, sizeof(temp_parm), TRUE);
@@ -1137,7 +1131,7 @@ void T4_ManageCaps()
         g_T4_AppData.HkTlm.obs = 1;
     }
 
-    if (getActiveCharge() < g_T4_AppData.HkTlm.critical_threshold && g_T4_AppData.HkTlm.obs == 1)
+    if (getActiveCharge() < g_T4_AppData.HkTlm.health_threshold && g_T4_AppData.HkTlm.obs == 1)
     {
         g_T4_AppData.HkTlm.health = 1;
         g_T4_AppData.HkTlm.obs = 0;
@@ -1146,13 +1140,18 @@ void T4_ManageCaps()
         CFE_SB_SetCmdCode((CFE_SB_Msg_t*)&temp_parm, WISE_OBS_STOP_CC);
         CFE_SB_SendMsg((CFE_SB_Msg_t*)&temp_parm);
     }
-    else if (getActiveCharge() > g_T4_AppData.HkTlm.critical_threshold)
+    else if (getActiveCharge() > g_T4_AppData.HkTlm.health_threshold)
     {
         g_T4_AppData.HkTlm.health = 0;
     }
     else
     {
         g_T4_AppData.HkTlm.health = 1;
+    }
+
+    if (getActiveCharge() < g_T4_AppData.HkTlm.critical_threshold && (wise_tlm.wiseCapA_State != 0 || wise_tlm.wiseCapB_State != 0 || wise_tlm.wiseCapC_State != 0))
+    {
+        // TODO: Send Critical Message
     }
 
     T4_dischargeCaps();
@@ -1163,7 +1162,7 @@ void T4_dischargeCaps()
 {
     if (g_T4_AppData.HkTlm.active_cap == 0 && wise_tlm.wiseActiveCap == 0)
     {
-        if (wise_tlm.wiseCapB_Charge > 8500 && wise_tlm.wiseCapB_State < 2)
+        if (wise_tlm.wiseCapB_Charge > g_T4_AppData.HkTlm.obs_threshold && wise_tlm.wiseCapB_State < 2)
         {
             T4_WISE_ParmCmd_t temp_parm;
             CFE_SB_InitMsg(&temp_parm, WISE_CMD_MID, sizeof(temp_parm), TRUE);
@@ -1171,7 +1170,7 @@ void T4_dischargeCaps()
             CFE_SB_SetCmdCode((CFE_SB_Msg_t*)&temp_parm, WISE_CAP_DISCHARGE_CC);
             CFE_SB_SendMsg((CFE_SB_Msg_t*)&temp_parm);
         }
-        if (wise_tlm.wiseCapC_Charge > 8500 && wise_tlm.wiseCapC_State < 2)
+        if (wise_tlm.wiseCapC_Charge > g_T4_AppData.HkTlm.obs_threshold && wise_tlm.wiseCapC_State < 2)
         {
             T4_WISE_ParmCmd_t temp_parm;
             CFE_SB_InitMsg(&temp_parm, WISE_CMD_MID, sizeof(temp_parm), TRUE);
@@ -1182,7 +1181,7 @@ void T4_dischargeCaps()
     }
     else if (g_T4_AppData.HkTlm.active_cap == 1 && wise_tlm.wiseActiveCap == 1)
     {
-        if (wise_tlm.wiseCapA_Charge > 8500 && wise_tlm.wiseCapA_State < 2)
+        if (wise_tlm.wiseCapA_Charge > g_T4_AppData.HkTlm.obs_threshold && wise_tlm.wiseCapA_State < 2)
         {
             T4_WISE_ParmCmd_t temp_parm;
             CFE_SB_InitMsg(&temp_parm, WISE_CMD_MID, sizeof(temp_parm), TRUE);
@@ -1190,7 +1189,7 @@ void T4_dischargeCaps()
             CFE_SB_SetCmdCode((CFE_SB_Msg_t*)&temp_parm, WISE_CAP_DISCHARGE_CC);
             CFE_SB_SendMsg((CFE_SB_Msg_t*)&temp_parm);
         }
-        else if (wise_tlm.wiseCapC_Charge > 8500 && wise_tlm.wiseCapC_State < 2)
+        else if (wise_tlm.wiseCapC_Charge > g_T4_AppData.HkTlm.obs_threshold && wise_tlm.wiseCapC_State < 2)
         {
             T4_WISE_ParmCmd_t temp_parm;
             CFE_SB_InitMsg(&temp_parm, WISE_CMD_MID, sizeof(temp_parm), TRUE);
@@ -1201,7 +1200,7 @@ void T4_dischargeCaps()
     }
     else if (g_T4_AppData.HkTlm.active_cap == 2 && wise_tlm.wiseActiveCap == 2)
     {
-        if (wise_tlm.wiseCapB_Charge > 8500 && wise_tlm.wiseCapB_State < 2)
+        if (wise_tlm.wiseCapB_Charge > g_T4_AppData.HkTlm.obs_threshold && wise_tlm.wiseCapB_State < 2)
         {
             T4_WISE_ParmCmd_t temp_parm;
             CFE_SB_InitMsg(&temp_parm, WISE_CMD_MID, sizeof(temp_parm), TRUE);
@@ -1209,7 +1208,7 @@ void T4_dischargeCaps()
             CFE_SB_SetCmdCode((CFE_SB_Msg_t*)&temp_parm, WISE_CAP_DISCHARGE_CC);
             CFE_SB_SendMsg((CFE_SB_Msg_t*)&temp_parm);
         }
-        else if (wise_tlm.wiseCapA_Charge > 8500 && wise_tlm.wiseCapA_State < 2)
+        else if (wise_tlm.wiseCapA_Charge > g_T4_AppData.HkTlm.obs_threshold && wise_tlm.wiseCapA_State < 2)
         {
             T4_WISE_ParmCmd_t temp_parm;
             CFE_SB_InitMsg(&temp_parm, WISE_CMD_MID, sizeof(temp_parm), TRUE);
@@ -1238,6 +1237,10 @@ uint16 getActiveCharge()
 
 int calcActiveCap()
 {
+    if (g_T4_AppData.HkTlm.active_cap != wise_tlm.wiseActiveCap)
+    {
+        return g_T4_AppData.HkTlm.active_cap;
+    }
     if (wise_tlm.wiseActiveCap == 0)
     {
         if (wise_tlm.wiseCapB_Charge > wise_tlm.wiseCapA_Charge)
@@ -1308,6 +1311,48 @@ int calcActiveCap()
         }
     }
     return -1;
+}
+
+void T4_dischargeSpecificCap(uint16 cap)
+{
+    int l_cap = (int) cap;
+    if (g_T4_AppData.HkTlm.active_cap != l_cap && wise_tlm.wiseActiveCap != l_cap)
+    {
+        if (l_cap == 0 && wise_tlm.wiseCapA_State < 2)
+        {
+            T4_WISE_ParmCmd_t temp_parm;
+            CFE_SB_InitMsg(&temp_parm, WISE_CMD_MID, sizeof(temp_parm), TRUE);
+            temp_parm.target = 0;
+            CFE_SB_SetCmdCode((CFE_SB_Msg_t*)&temp_parm, WISE_CAP_DISCHARGE_CC);
+            CFE_SB_SendMsg((CFE_SB_Msg_t*)&temp_parm);
+        }
+        else if (l_cap == 1 && wise_tlm.wiseCapB_State < 2)
+        {
+            T4_WISE_ParmCmd_t temp_parm;
+            CFE_SB_InitMsg(&temp_parm, WISE_CMD_MID, sizeof(temp_parm), TRUE);
+            temp_parm.target = 1;
+            CFE_SB_SetCmdCode((CFE_SB_Msg_t*)&temp_parm, WISE_CAP_DISCHARGE_CC);
+            CFE_SB_SendMsg((CFE_SB_Msg_t*)&temp_parm);
+        }
+        else if (l_cap == 2 && wise_tlm.wiseCapC_State < 2)
+        {
+            T4_WISE_ParmCmd_t temp_parm;
+            CFE_SB_InitMsg(&temp_parm, WISE_CMD_MID, sizeof(temp_parm), TRUE);
+            temp_parm.target = 2;
+            CFE_SB_SetCmdCode((CFE_SB_Msg_t*)&temp_parm, WISE_CAP_DISCHARGE_CC);
+            CFE_SB_SendMsg((CFE_SB_Msg_t*)&temp_parm);
+        }
+    }
+}
+
+void T4_reboot()
+{
+    T4_InitData();
+}
+
+void T4_sendAvail()
+{
+    // TODO: Send Availability Message
 }
     
 /*=======================================================================================
