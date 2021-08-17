@@ -637,27 +637,6 @@ void T4_ProcessNewData()
                 case WISE_HK_TLM_MID:;
                     T4_Wise_Tlm_t* temp = ((T4_Wise_Tlm_t *) TlmMsgPtr);
                     wise_tlm = *temp;
-
-                    CFE_EVS_SendEvent(T4_CMD_INF_EID, CFE_EVS_INFORMATION,
-                                      "T4 - wiseSbcState (%u)",
-                                      wise_tlm.wiseSbcState);
-
-                    CFE_EVS_SendEvent(T4_CMD_INF_EID, CFE_EVS_INFORMATION,
-                                      "T4 - wiseDamage (%u)",
-                                      wise_tlm.wiseDamage);
-
-                    CFE_EVS_SendEvent(T4_CMD_INF_EID, CFE_EVS_INFORMATION,
-                                      "T4 - wiseCapACharge (%u)",
-                                      wise_tlm.wiseCapA_Charge);
-
-                    CFE_EVS_SendEvent(T4_CMD_INF_EID, CFE_EVS_INFORMATION,
-                                      "T4 - wiseCapBCharge (%u)",
-                                      wise_tlm.wiseCapB_Charge);
-
-                    CFE_EVS_SendEvent(T4_CMD_INF_EID, CFE_EVS_INFORMATION,
-                                      "T4 - wiseCapCCharge (%u)",
-                                      wise_tlm.wiseCapC_Charge);
-
                     break;
 
                 default:
@@ -1186,8 +1165,6 @@ void T4_dischargeCaps()
     {
         if (wise_tlm.wiseCapB_Charge > 8500 && wise_tlm.wiseCapB_State < 2)
         {
-            CFE_EVS_SendEvent(T4_CMD_INF_EID, CFE_EVS_INFORMATION,
-                              "ACT: A, DIS: B");
             T4_WISE_ParmCmd_t temp_parm;
             CFE_SB_InitMsg(&temp_parm, WISE_CMD_MID, sizeof(temp_parm), TRUE);
             temp_parm.target = 1;
@@ -1196,8 +1173,6 @@ void T4_dischargeCaps()
         }
         if (wise_tlm.wiseCapC_Charge > 8500 && wise_tlm.wiseCapC_State < 2)
         {
-            CFE_EVS_SendEvent(T4_CMD_INF_EID, CFE_EVS_INFORMATION,
-                              "ACT: A, DIS: C");
             T4_WISE_ParmCmd_t temp_parm;
             CFE_SB_InitMsg(&temp_parm, WISE_CMD_MID, sizeof(temp_parm), TRUE);
             temp_parm.target = 2;
@@ -1209,8 +1184,6 @@ void T4_dischargeCaps()
     {
         if (wise_tlm.wiseCapA_Charge > 8500 && wise_tlm.wiseCapA_State < 2)
         {
-            CFE_EVS_SendEvent(T4_CMD_INF_EID, CFE_EVS_INFORMATION,
-                              "ACT: B, DIS: A");
             T4_WISE_ParmCmd_t temp_parm;
             CFE_SB_InitMsg(&temp_parm, WISE_CMD_MID, sizeof(temp_parm), TRUE);
             temp_parm.target = 0;
@@ -1219,8 +1192,6 @@ void T4_dischargeCaps()
         }
         else if (wise_tlm.wiseCapC_Charge > 8500 && wise_tlm.wiseCapC_State < 2)
         {
-            CFE_EVS_SendEvent(T4_CMD_INF_EID, CFE_EVS_INFORMATION,
-                              "ACT: B, DIS: C");
             T4_WISE_ParmCmd_t temp_parm;
             CFE_SB_InitMsg(&temp_parm, WISE_CMD_MID, sizeof(temp_parm), TRUE);
             temp_parm.target = 2;
@@ -1232,8 +1203,6 @@ void T4_dischargeCaps()
     {
         if (wise_tlm.wiseCapB_Charge > 8500 && wise_tlm.wiseCapB_State < 2)
         {
-            CFE_EVS_SendEvent(T4_CMD_INF_EID, CFE_EVS_INFORMATION,
-                              "ACT: C, DIS: B");
             T4_WISE_ParmCmd_t temp_parm;
             CFE_SB_InitMsg(&temp_parm, WISE_CMD_MID, sizeof(temp_parm), TRUE);
             temp_parm.target = 1;
@@ -1242,8 +1211,6 @@ void T4_dischargeCaps()
         }
         else if (wise_tlm.wiseCapA_Charge > 8500 && wise_tlm.wiseCapA_State < 2)
         {
-            CFE_EVS_SendEvent(T4_CMD_INF_EID, CFE_EVS_INFORMATION,
-                              "ACT: C, DIS: A");
             T4_WISE_ParmCmd_t temp_parm;
             CFE_SB_InitMsg(&temp_parm, WISE_CMD_MID, sizeof(temp_parm), TRUE);
             temp_parm.target = 0;
