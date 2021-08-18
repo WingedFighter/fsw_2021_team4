@@ -42,7 +42,7 @@
 #define T4_SET_HEALTH_CC           3
 #define T4_SET_OBS_TLD_CC          4
 #define T4_SET_LVR_TLD_CC          5
-#define T4_SET_CRT_TLD_CC          6
+#define T4_SET_HLT_TLD_CC          6
 #define T4_SET_HEAT_TLD_CC         7
 #define T4_SET_VERBOSITY_CC        8
 #define T4_SET_OBS_STATE_CC        9
@@ -76,8 +76,8 @@ typedef struct
     uint16             obs;
     uint16             heat;
     uint16             active_cap;
+    uint16             can_observe;
     uint16             heat_threshold;
-    uint16             critical_threshold;
     uint16             obs_threshold;
     uint16             louver_threshold;
     uint16             health_threshold;

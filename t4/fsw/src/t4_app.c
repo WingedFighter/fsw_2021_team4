@@ -344,7 +344,6 @@ int32 T4_InitData()
                    T4_HK_TLM_MID, sizeof(g_T4_AppData.HkTlm), TRUE);
 
     g_T4_AppData.HkTlm.obs_threshold = 8500;
-    g_T4_AppData.HkTlm.critical_threshold = 1500;
     g_T4_AppData.HkTlm.health_threshold = 2500;
 
     memset((void*)&wise_tlm, 0x00, sizeof(wise_tlm));
@@ -846,9 +845,9 @@ void T4_ProcessNewAppCmds(CFE_SB_Msg_t* MsgPtr)
                 CmdPtr = (T4_ParmCmd_t*) MsgPtr;
                 g_T4_AppData.HkTlm.louver_threshold = CmdPtr->target;
                 break;
-            case T4_SET_CRT_TLD_CC:; //Set health critical threshold to specific value
+            case T4_SET_HLT_TLD_CC:; //Set health threshold to specific value
                 CmdPtr = (T4_ParmCmd_t*) MsgPtr;
-                g_T4_AppData.HkTlm.critical_threshold = CmdPtr->target;
+                g_T4_AppData.HkTlm.health_threshold = CmdPtr->target;
                 break;
             case T4_SET_HEAT_TLD_CC:; //Set heat threshold to specific value
                 CmdPtr = (T4_ParmCmd_t*) MsgPtr;
@@ -1129,6 +1128,11 @@ void T4_ManageCaps()
         CFE_SB_SetCmdCode((CFE_SB_Msg_t*)&temp_parm, WISE_OBS_START_CC);
         CFE_SB_SendMsg((CFE_SB_Msg_t*)&temp_parm);
         g_T4_AppData.HkTlm.obs = 1;
+        g_T4_AppData.HkTlm.can_observe = 1;
+    }
+    else
+    {
+        g_T4_AppData.HkTlm.can_observe = 0;
     }
 
     if (getActiveCharge() < g_T4_AppData.HkTlm.health_threshold && g_T4_AppData.HkTlm.obs == 1)
@@ -1147,11 +1151,6 @@ void T4_ManageCaps()
     else
     {
         g_T4_AppData.HkTlm.health = 1;
-    }
-
-    if (getActiveCharge() < g_T4_AppData.HkTlm.critical_threshold && (wise_tlm.wiseCapA_State != 0 || wise_tlm.wiseCapB_State != 0 || wise_tlm.wiseCapC_State != 0))
-    {
-        // TODO: Send Critical Message
     }
 
     T4_dischargeCaps();
